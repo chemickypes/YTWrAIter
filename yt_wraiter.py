@@ -9,10 +9,10 @@ def private_get_transcription(video_id: str, language="it"):
     for item in data:
         transcription.append(item['text'])
 
-    return {'video_id': video_id, "language": language, "text": "\n".join(transcription)}
+    return {'video_id': video_id, "language": language, "text": " ".join(transcription)}
 
 
-@tool
+@tool(return_direct=True, examples=["give me the transcription of the video https://www.youtube.com/watch?v=HDJZrp0Hfiw using italian", "I have this video https://www.youtube.com/watch?v=HDJZrp0Hfiw give me the transcription in italian"])
 def get_transcription(tool_input, cat):
     """Useful to get transcription of a Youtube Video. This tool get a video id and returns the transcription.
     The inputs are two values separated with a minus: the first one is video id and from a youtube url is the query parameter v;
