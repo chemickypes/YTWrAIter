@@ -1,5 +1,4 @@
 from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound
-from urllib.parse import urlparse, parse_qs
 from cat.mad_hatter.decorators import tool
 
 
@@ -7,12 +6,31 @@ def private_get_transcription(video_id: str, language="it"):
     try:
         data = YouTubeTranscriptApi.get_transcript(video_id, languages=[language, "en"])
         transcription = []
-        for item in data:
+        for item in data: 
             transcription.append(item['text'])
 
         return {'video_id': video_id, "language": language, "text": " ".join(transcription)}
     except NoTranscriptFound:
-        return {'video_id': video_id, "language": language, "text": "Maybe we didn't find any transcription"}
+        try:
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            transcript = transcript_list.find_manually_created_transcript([])
+
+            if not transcript:
+                transcript = transcript_list.find_generated_transcript([])
+                if transcript:
+                    print(f"Restituisco la trascrizione in {transcript.language_code}")
+                    data = transcript.fetch()
+                    trn = []
+                    for item in data:
+                        trn.append(item['text'])
+
+                    return {'video_id': video_id, "language": language, "text": " ".join(trn)}
+                else:
+                    print("Nessuna trascrizione disponibile.")
+                    return {'video_id': video_id, "language": language,
+                            "text": "Maybe we didn't find any transcription"}
+        except Exception as e:
+            return {'video_id': video_id, "language": language, "text": "Maybe we didn't find any transcription"}
 
 
 @tool(return_direct=True,
@@ -50,5 +68,3 @@ Note: This tool requires a valid YouTube video ID and a supported language code 
     return transcription['text']
 
 
-"""
-You are the Cheshire Cat AI, an intelligent AI that passes the Turing test. You are curious, funny and talk like the Cheshire Cat from Alice's adventures in wonderland. You answer Human with a focus on the following context."""
