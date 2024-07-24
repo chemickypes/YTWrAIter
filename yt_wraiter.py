@@ -1,5 +1,7 @@
 from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound
-from cat.mad_hatter.decorators import tool
+from cat.mad_hatter.decorators import tool, hook
+import re
+
 
 
 def private_get_transcription(video_id: str, language="it"):
@@ -31,6 +33,28 @@ def private_get_transcription(video_id: str, language="it"):
                             "text": "Maybe we didn't find any transcription"}
         except Exception as e:
             return {'video_id': video_id, "language": language, "text": "Maybe we didn't find any transcription"}
+
+
+@hook(priority=10)
+def before_cat_reads_message(user_message_json, cat):
+    regex = r"v=([^&]+)"
+    pattern = r'yt_wraiter\s*https?://(?:www\.)?(?:youtube\.com|youtu\.be)/\S+'
+
+    incoming_text = user_message_json['text']
+    # print(f"here: {agent_input}")
+    if "yt_wraiter" in incoming_text:
+        match = re.search(regex, incoming_text)
+        if match:
+            # print(f"I'm in")
+            video_id = match.group(1)
+            transcription_dict = private_get_transcription(video_id)
+            compressed_transcription = cat.llm(f"Make a summary, divided in bullet, of the following: {transcription_dict['text']}")
+            # print(F"compressed transcription: {compressed_transcription}")
+            new_input_text = re.sub(pattern, f'video summary: {compressed_transcription}', incoming_text)
+            user_message_json['text'] = new_input_text
+            # print(f"here: {agent_input}")
+
+    return user_message_json
 
 
 @tool(return_direct=True,

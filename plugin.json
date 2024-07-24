@@ -1,9 +1,9 @@
 {
     "name": "YTWrAIter",
-    "version": "0.0.2",
-    "description": "YTWrAIter let you get a YT video transcription",
+    "version": "0.0.3",
+    "description": "YTWrAIter let you get a YT video transcription and write articles or summaris",
     "author_name": "Angelo Moroni",
     "plugin_url": "https://github.com/chemickypes/YTWrAIter",
-    "tags": "youtube, transcription, cat",
+    "tags": "youtube, transcription, cat, article",
     "thumb": "https://raw.githubusercontent.com/chemickypes/YTWrAIter/main/yt_wraiter.png"
 }
